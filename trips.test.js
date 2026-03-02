@@ -1,5 +1,6 @@
 const request = require('supertest');
 const app = require('./app');
+const moment = require('moment');
 
 it('GET /trips/request', async () => {
  const date = moment('2026-03-03T20:54:51.812Z').format('YYYY-MM-DD');
