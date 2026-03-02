@@ -3,14 +3,14 @@ var router = express.Router();
 var Trips = require('../data');
 
 router.get('/', function(req, res) {
-  trips.find().then(data => 
+  Trips.find().then(data => 
     res.json(data))
 });
 
-router.get('/:departure/:arrival/:date', function (req, res) {
+router.get('/request/:departure/:arrival/:date', function (req, res) {
   const { departure, arrival, date } = req.params;
 
-  trips.find({ departure, arrival, date })
+  Trips.find({ departure: departure, arrival: arrival, date: date })
     .then(data => {
       if (data.length > 0) {
         res.json({ result: true, data });
