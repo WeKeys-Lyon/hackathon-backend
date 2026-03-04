@@ -12,9 +12,9 @@ const bookingSchema = mongoose.Schema({
     price: Number
 })
 const userSchema = mongoose.Schema({
-    cookie: Number,
-    cart: cartSchema,
-    booking: bookingSchema,
+    cookie: {type: String, unique: true},
+    cart: [cartSchema],
+    booking: [bookingSchema],
 });
 
 const User = mongoose.model('users', userSchema);

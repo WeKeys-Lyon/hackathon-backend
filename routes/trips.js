@@ -1,11 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var Trips = require('../data');
+const {isUserExist} = require('../modules/users');
+const User = require('../models/users');
 
-router.get('/', (req, res) => {
-  Trips.find().then(data => 
-    res.json(data))
-});
 
 router.get('/request/:departure/:arrival/:date',  (req, res) => {
   let { departure, arrival, date } = req.params;
@@ -23,4 +21,35 @@ router.get('/request/:departure/:arrival/:date',  (req, res) => {
   }
 );
 
+router.post('/addtocart', async (req,res) => {
+  //Ajout en BDD du trip choisi avec le cookie comme désignation de l'utilisateur
+  //On check si l'utilisateur existe en BDD et on répond
+  if (await isUserExist(req.body.cookie)) {
+    //On ajoute en BDD le trip en chargeant l'utilisateur existant
+    const utilisateur = await User.findOne({cookie: req.body.cookie});
+    utilisateur.cart.push({
+      departure: req.body.departure,
+      arrival: req.body.arrival,
+      date: req.body.date,
+      price: req.body.price
+    });
+    utilisateur.save();
+
+    return res.status(200).send({ result: true, log: 'L\'utilisateur existait déjà'});
+  } else {
+      //On ajoute en BDD l'utilisateur et le trip
+    const newUser = new User({
+      cookie: req.body.cookie,
+      cart: {
+      departure: req.body.departure,
+      arrival: req.body.arrival,
+      date: req.body.date,
+      price: req.body.price       
+      }
+    })
+    newUser.save()
+    return res.status(200).send({result: false, log: 'L\'utilisateur n\'existait pas, il a été créé' })
+  }
+
+})
 module.exports = router;
