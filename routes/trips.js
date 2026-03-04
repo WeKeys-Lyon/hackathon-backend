@@ -8,20 +8,19 @@ router.get('/', (req, res) => {
 });
 
 router.get('/request/:departure/:arrival/:date',  (req, res) => {
-  const { departure, arrival, date } = req.params;
- // On reçois une date => 2026-03-03, du coup il faut faire une regex sur la recheche de DATE 
- // ATTENTION Date est un sous document.
- // Modification des params departure et arrival en First Uppercase then lowercase
-    console.log(Trips[0])
-    let result = [];
-  Trips.filter(trajet => { /* recherche / condition puis && result.push(trajet) */})
+  let { departure, arrival, date } = req.params;
+
+  departure = departure.slice(0,1).toUpperCase() + departure.slice(1).toLowerCase();
+  arrival = arrival.slice(0,1).toUpperCase() + arrival.slice(1).toLowerCase();
+  datereg = new RegExp(date, "gi")
+
+  let result = [];
+  Trips.filter(trajet => { (trajet.departure == departure && 
+    trajet.arrival == arrival &&
+    trajet.date['$date'].match(datereg)) && result.push(trajet)});
     
-    if (result.length > 0) {
-        res.status(200).send({ result: true, trips: result });
-      } else {
-        res.status(200).send({ result: false, error: 'No trip found' });
-      }
-    }
+    (result.length > 0) ? res.status(200).send({ result: true, trips: result }) : res.status(200).send({ result: false, error: 'No trip found' });
+  }
 );
 
 module.exports = router;
