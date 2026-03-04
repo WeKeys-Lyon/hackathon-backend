@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var Trips = require('../data');
-const {isUserExist, isCartExist} = require('../modules/users');
+const {isUserExist, isCartExist, isBookExist, createMyBooking} = require('../modules/users');
 const User = require('../models/users');
+const mongoose = require('mongoose');
 
 
 router.get('/request/:departure/:arrival/:date',  (req, res) => {
@@ -57,35 +58,22 @@ router.post('/addtobooking', async (req,res) => {
   //On reçoit en body un simple ObjectID qui celui du sousdocument et le cookie de l'utilisateur
   //, et suppression du trip dans le cart
   
-  //On vérifie que le cart est bien présent
-  if (await isCartExist(req.body.cartId, req.body.cookie)) {
     //Ajout en BDD du trip qui est dans le cart vers Booking
-    let book = {
-      departure: '',
-      arrival: '',
-      date: '',
-      price: ''
-    };
-    await User.aggregate([{
-      "$match": {
-        "cookie": req.body.cookie,
-      }
-    },{
-      "$unwind" : "$cart"
-    },{
-      "$match": {
-        "cart._id": new mongoose.Types.ObjectId("69a88937f0320560f708b1be")
+    let book = await createMyBooking(req.body.cartId, req.body.cookie);
+    if (book == false) {
+      return res.status(200).send({result: false, log: 'Rien trouvé dans le Panier'}); 
+    } else {
+        if (!await isBookExist(book, req.body.cookie)) {
+                const utilisateur = await User.findOne({cookie: req.body.cookie});
+                utilisateur.booking.push(book);
+                utilisateur.cart.pull(req.body.cartId);
+                utilisateur.save()
+          } else {
+            return res.status(200).send({result: false, log: 'J\'ai déjà ce trajet dans le Booking'})
+          }
+        return res.status(200).send({result: true, log: 'j ai bien un résultat'});
       }
     }
-
-    ]).then(result => console.log(result))
     
-/*     cart.booking.push({
-
-    }) */
-    return res.status(200).send({result: true, log: 'j ai bien un résultat'});
-  } else {
-    return res.status(200).send({result: false, log: 'rien trouvé'});
-  }
-})
+)
 module.exports = router;
