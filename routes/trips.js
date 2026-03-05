@@ -7,7 +7,8 @@ const mongoose = require('mongoose');
 
 
 router.get('/request/:departure/:arrival/:date',  (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  /* res.setHeader('Access-Control-Allow-Origin', '*'); */
+
   let { departure, arrival, date } = req.params;
 
   departure = departure.slice(0,1).toUpperCase() + departure.slice(1).toLowerCase();
@@ -25,14 +26,14 @@ router.get('/request/:departure/:arrival/:date',  (req, res) => {
 
 router.post('/addtocart', async (req,res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+ 
   //Ajout en BDD du trip choisi avec le cookie comme désignation de l'utilisateur
   //On check si l'utilisateur existe en BDD et on répond
   if (await isUserExist(req.body.cookie)) {
     //On ajoute en BDD le trip en chargeant l'utilisateur existant
     const utilisateur = await User.findOne({cookie: req.body.cookie});
     utilisateur.cart.push({
-      departure: req.body.departure,
-      arrival: req.body.arrival,
+      trajet: req.body.trajet,
       date: req.body.date,
       price: req.body.price
     });
@@ -78,5 +79,21 @@ router.post('/addtobooking', async (req,res) => {
       }
     }
     
-)
+);
+
+router.post('/alltrips', async(req,res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Faire un appel Mongoose pour obtenir un tableau des trajets - très important prendre l'ObjectId du trajet
+    let utilisateur = req.body.cookie;
+    User.findOne({cookie: utilisateur}).then(data => {
+        if (data.cart) {
+          res.status(200).send({result: true, log: 'Voici les résultats', voyages: data.cart})
+        } else if (data == null){
+          res.status(200).send({result: false, log: 'utilisateur inconnu' })
+        } else {
+          res.status(200).send({result: true, log: 'J ai rien trouvé', voyages: 0})
+        }
+    })
+
+})
 module.exports = router;

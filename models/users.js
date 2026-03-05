@@ -1,13 +1,11 @@
 const mongoose = require('mongoose');
 const cartSchema = mongoose.Schema({
-    departure: String,
-    arrival: String,
+    trajet: String,
     date: Date,
     price: Number
 });
 const bookingSchema = mongoose.Schema({
-    departure: String,
-    arrival: String,
+    trajet: String,
     date: Date,
     price: Number
 })
