@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Trips = require('../data');
-const {isUserExist, isCartExist, isBookExist, createMyBooking} = require('../modules/users');
+const {isUserExist, isBookExist, createMyBooking} = require('../modules/users');
 const User = require('../models/users');
 const mongoose = require('mongoose');
 
