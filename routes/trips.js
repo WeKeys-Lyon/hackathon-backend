@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 
 router.get('/request/:departure/:arrival/:date',  (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let { departure, arrival, date } = req.params;
 
   departure = departure.slice(0,1).toUpperCase() + departure.slice(1).toLowerCase();
@@ -23,6 +24,7 @@ router.get('/request/:departure/:arrival/:date',  (req, res) => {
 );
 
 router.post('/addtocart', async (req,res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   //Ajout en BDD du trip choisi avec le cookie comme désignation de l'utilisateur
   //On check si l'utilisateur existe en BDD et on répond
   if (await isUserExist(req.body.cookie)) {
@@ -55,6 +57,7 @@ router.post('/addtocart', async (req,res) => {
 });
 
 router.post('/addtobooking', async (req,res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   //On reçoit en body un simple ObjectID qui celui du sousdocument et le cookie de l'utilisateur
   //, et suppression du trip dans le cart
   
