@@ -26,7 +26,9 @@ router.get('/request/:departure/:arrival/:date',  (req, res) => {
 
 router.post('/addtocart', async (req,res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
- 
+  if (!req.body.trajet || !req.body.date || ! req.body.price) {
+    return res.status(200).send({result: false, log: 'Pas assez d\'éléments pour lancer la requete'});
+  }
   //Ajout en BDD du trip choisi avec le cookie comme désignation de l'utilisateur
   //On check si l'utilisateur existe en BDD et on répond
   if (await isUserExist(req.body.cookie)) {
@@ -45,8 +47,7 @@ router.post('/addtocart', async (req,res) => {
     const newUser = new User({
       cookie: req.body.cookie,
       cart: {
-      departure: req.body.departure,
-      arrival: req.body.arrival,
+      trajet: req.body.trajet,
       date: req.body.date,
       price: req.body.price       
       }
@@ -85,8 +86,9 @@ router.post('/alltrips', async(req,res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     // Faire un appel Mongoose pour obtenir un tableau des trajets - très important prendre l'ObjectId du trajet
     let utilisateur = req.body.cookie;
+    
     User.findOne({cookie: utilisateur}).then(data => {
-        if (data.cart) {
+        if (data) {
           res.status(200).send({result: true, log: 'Voici les résultats', voyages: data.cart})
         } else if (data == null){
           res.status(200).send({result: false, log: 'utilisateur inconnu' })
@@ -95,5 +97,16 @@ router.post('/alltrips', async(req,res) => {
         }
     })
 
+});
+
+router.post('/deleteatrip', async(req,res) => {
+  if (!req.body.id || !req.body.cookie) {
+    return res.status(200).send({result: false, log: 'Il manque des éléments ID ou Cookie'});
+  }
+  
+  const utilisateur = await User.findOne({cookie: req.body.cookie});
+  utilisateur.cart.pull(req.body.id);
+  utilisateur.save()
+  res.status(200).send({result: true, log: 'Supprimé du pannier'})
 })
 module.exports = router;
