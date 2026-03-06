@@ -65,6 +65,7 @@ router.post('/addtobooking', async (req,res) => {
   
     //Ajout en BDD du trip qui est dans le cart vers Booking
     let book = await createMyBooking(req.body.cartId, req.body.cookie);
+    console.log(book)
     if (book == false) {
       return res.status(200).send({result: false, log: 'Rien trouvé dans le Panier'}); 
     } else {
@@ -99,6 +100,22 @@ router.post('/alltrips', async(req,res) => {
 
 });
 
+router.post('/allbookings', (req,res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    //Faire un appel Mongoose pour obtenir un tableau des réservations achetés.
+    let utilisateur = req.body.cookie;
+    
+    User.findOne({cookie: utilisateur}).then(data => {
+        if (data) {
+          res.status(200).send({result: true, log: 'Voici les résultats', voyages: data.booking})
+        } else if (data == null){
+          res.status(200).send({result: false, log: 'utilisateur inconnu' })
+        } else {
+          res.status(200).send({result: true, log: 'J ai rien trouvé', voyages: 0})
+        }
+    })
+})
+
 router.post('/deleteatrip', async(req,res) => {
   if (!req.body.id || !req.body.cookie) {
     return res.status(200).send({result: false, log: 'Il manque des éléments ID ou Cookie'});
@@ -108,5 +125,6 @@ router.post('/deleteatrip', async(req,res) => {
   utilisateur.cart.pull(req.body.id);
   utilisateur.save()
   res.status(200).send({result: true, log: 'Supprimé du pannier'})
-})
+});
+
 module.exports = router;

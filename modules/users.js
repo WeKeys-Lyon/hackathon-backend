@@ -66,8 +66,7 @@ function createMyBooking(cartId, name) {
     ]).then(result => {
         if (result[0]) {
             book = {
-      departure: result[0].cart.departure,
-      arrival: result[0].cart.arrival,
+      trajet: result[0].cart.trajet,
       date: result[0].cart.date,
       price: result[0].cart.price
     };
